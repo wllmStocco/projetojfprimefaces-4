@@ -3,18 +3,15 @@ package br.upf.projetojfprimefaces.facade;
 import br.upf.projetojfprimefaces.entity.PessoaEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.ArrayList;
 import java.util.List;
 
-//respondem apenas a uma chamada e logo depois podem ser 
-@Stateless //utilizados para outras chamadas de qualquer cliente.            
+@Stateless           
 public class PessoaFacade extends AbstractFacade<PessoaEntity> {
 
-    /**
-     * Definindo a unidade de persistencia
-     */
     @PersistenceContext(unitName = "ProjetojfprimefacesPU")
     private EntityManager em;
 
@@ -23,9 +20,6 @@ public class PessoaFacade extends AbstractFacade<PessoaEntity> {
         return em;
     }
 
-    /**
-     * Construtor que passa para superclasse a instância de PessoaEntity
-     */
     public PessoaFacade() {
         super(PessoaEntity.class);
     }
@@ -35,9 +29,7 @@ public class PessoaFacade extends AbstractFacade<PessoaEntity> {
     public List<PessoaEntity> buscarTodos() {
         entityList = new ArrayList<>();
         try {
-            //utilizando JPQL para construir a query 
             Query query = getEntityManager().createQuery("SELECT p FROM PessoaEntity p order by p.nome");
-            //verifica se existe algum resultado para não gerar excessão
             if (!query.getResultList().isEmpty()) {
                 entityList = (List<PessoaEntity>) query.getResultList();
             }
@@ -46,17 +38,20 @@ public class PessoaFacade extends AbstractFacade<PessoaEntity> {
         }
         return entityList;
     }
+
+    public PessoaEntity buscarUser(String user) {
+        PessoaEntity entityList = null;
+        try {
+            Query query = getEntityManager().createQuery("SELECT p FROM PessoaEntity p WHERE p.email = :email");
+            query.setParameter("email", user);
+
+            entityList = (PessoaEntity) query.getSingleResult();
+        } catch (NoResultException e) {
+            System.out.println("Nenhum usuário encontrado com o email fornecido.");
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar usuário: " + e.getMessage());
+            e.printStackTrace(); 
+        }
+        return entityList;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -16,7 +18,10 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "pessoa")//mapeando o nome da tabela no banco de dados
+@Table(name = "pessoa")
+@NamedQueries({
+    @NamedQuery(name = "Pessoa.buscarUser", query = "SELECT p FROM PessoaEntity p WHERE p.email = :email"),
+})
 public class PessoaEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,9 +32,9 @@ public class PessoaEntity implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Basic(optional = false) //atributo não é opcional
-    @NotNull //definido como obrigatório
-    @Size(min = 1, max = 500) //quantidade min e max de caracteres
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 500)
     @Column(name = "nome")
     private String nome;
 
@@ -58,6 +63,11 @@ public class PessoaEntity implements Serializable {
 
     @Column(name = "observacao")
     private String observacao;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "datahorareg")
+    private Date datahorareg;
 
     @Basic(optional = false)
     @NotNull
@@ -136,6 +146,14 @@ public class PessoaEntity implements Serializable {
         this.observacao = observacao;
     }
 
+    public Date getDatahorareg() {
+        return datahorareg;
+    }
+
+    public void setDatahorareg(Date datahorareg) {
+        this.datahorareg = datahorareg;
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
@@ -157,7 +175,5 @@ public class PessoaEntity implements Serializable {
         final PessoaEntity other = (PessoaEntity) obj;
         return Objects.equals(this.id, other.id);
     }
-
-
 
 }

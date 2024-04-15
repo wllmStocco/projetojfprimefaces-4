@@ -13,18 +13,10 @@ public abstract class AbstractFacade<T> {
     
     protected abstract EntityManager getEntityManager();
 
-    /**
-     * Método responsável por salvar a entidade imediatamente no banco de dados
-     * em uma transação para ser usada posteriormente e pode ser revertida.
-     */
     public void flush() {
         getEntityManager().flush();
     }
 
-    /**
-     * Marca o final da transação e salva todas as alterações na transação no
-     * banco de dados e não pode ser revertido.
-     */
     public void commit() {
         getEntityManager().getTransaction().commit();
     }
