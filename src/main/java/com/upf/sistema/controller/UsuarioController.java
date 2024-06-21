@@ -24,6 +24,7 @@ public class UsuarioController implements Serializable {
     private UsuarioEntity usuario = new UsuarioEntity();
     private List<UsuarioEntity> usuarioList = new ArrayList<>();
     private UsuarioEntity selected;
+    private int nextId = 1;
 
     // Getters and Setters
     public UsuarioEntity getUsuario() {
@@ -49,10 +50,18 @@ public class UsuarioController implements Serializable {
     public void setSelected(UsuarioEntity selected) {
         this.selected = selected;
     }
+    
+    public int getNextId() {
+        return nextId;
+    }
+
+    public void setNextId(int nextId) {
+        this.nextId = nextId;
+    }
 
     // Methods
     private int gerarId() {
-        return usuarioList.isEmpty() ? 1 : usuarioList.size() + 1;
+        return nextId++;
     }
 
     private void exibirMensagem(String summary, String detail) {
@@ -61,6 +70,10 @@ public class UsuarioController implements Serializable {
     }
 
     public void adicionarUsuario() {
+        if (usuario.getNome() == null || usuario.getNome().isEmpty()) {
+            exibirMensagem("Erro", "Nome do usuário é obrigatório.");
+            return;
+        }
         try {
             usuario.setId(gerarId());
             usuarioList.add(usuario);
@@ -72,6 +85,10 @@ public class UsuarioController implements Serializable {
     }
 
     public void editarUsuario() {
+        if (selected == null) {
+            exibirMensagem("Erro", "Nenhum usuário selecionado para edição.");
+            return;
+        }
         try {
             int index = usuarioList.indexOf(selected);
             if (index != -1) {
@@ -87,6 +104,10 @@ public class UsuarioController implements Serializable {
     }
 
     public void deletarUsuario() {
+        if (selected == null) {
+            exibirMensagem("Erro", "Nenhum usuário selecionado para exclusão.");
+            return;
+        }
         try {
             int index = usuarioList.indexOf(selected);
             if (index != -1) {

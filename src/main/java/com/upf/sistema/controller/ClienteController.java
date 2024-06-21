@@ -6,7 +6,7 @@ package com.upf.sistema.controller;
 
 import com.upf.sistema.entity.ClienteEntity;
 import jakarta.inject.Named;
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import java.io.Serializable;
@@ -18,16 +18,15 @@ import java.util.List;
  * @author Usuario
  */
 @Named(value = "clienteController")
-@Dependent
+@SessionScoped
 public class ClienteController implements Serializable {
-    
-    public ClienteController() {
-    }
-    
+
     private ClienteEntity cliente = new ClienteEntity();
     private List<ClienteEntity> clienteList = new ArrayList<>();
     private ClienteEntity selected;
+    private int nextId = 1;
 
+    // Getters and Setters
     public ClienteEntity getCliente() {
         return cliente;
     }
@@ -51,15 +50,19 @@ public class ClienteController implements Serializable {
     public void setSelected(ClienteEntity selected) {
         this.selected = selected;
     }
-
-    private int gerarId() {
-        int id = 1;
-        if (!clienteList.isEmpty()) {
-            id = clienteList.size() + 1;
-        }
-        return id;
+    
+    public int getNextId() {
+        return nextId;
     }
 
+    public void setNextId(int nextId) {
+        this.nextId = nextId;
+    }
+
+    // Methods
+    private int gerarId() {
+        return nextId++;
+    }
 
     private void exibirMensagem(String summary, String detail) {
         FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);
@@ -67,17 +70,25 @@ public class ClienteController implements Serializable {
     }
 
     public void adicionarCliente() {
+        if (cliente.getNome() == null || cliente.getNome().isEmpty()) {
+            exibirMensagem("Erro", "Nome do cliente é obrigatório.");
+            return;
+        }
         try {
             cliente.setId(gerarId());
             clienteList.add(cliente);
             exibirMensagem("Info", "Cliente adicionado: " + cliente.getNome());
             cliente = new ClienteEntity(); // Resetar o objeto para um novo cadastro
         } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao adicionar Cliente: " + e.getMessage());
+            exibirMensagem("Erro", "Falha ao adicionar cliente: " + e.getMessage());
         }
     }
 
     public void editarCliente() {
+        if (selected == null) {
+            exibirMensagem("Erro", "Nenhum cliente selecionado para edição.");
+            return;
+        }
         try {
             int index = clienteList.indexOf(selected);
             if (index != -1) {
@@ -88,11 +99,15 @@ public class ClienteController implements Serializable {
             }
             selected = null;
         } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao editar Cliente: " + e.getMessage());
+            exibirMensagem("Erro", "Falha ao editar cliente: " + e.getMessage());
         }
     }
 
     public void deletarCliente() {
+        if (selected == null) {
+            exibirMensagem("Erro", "Nenhum cliente selecionado para exclusão.");
+            return;
+        }
         try {
             int index = clienteList.indexOf(selected);
             if (index != -1) {
@@ -103,7 +118,7 @@ public class ClienteController implements Serializable {
             }
             selected = null;
         } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao deletar usuário: " + e.getMessage());
+            exibirMensagem("Erro", "Falha ao deletar cliente: " + e.getMessage());
         }
     }
 }

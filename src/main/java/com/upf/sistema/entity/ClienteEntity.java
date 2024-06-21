@@ -11,7 +11,7 @@ import java.util.Date;
  * @author Usuario
  */
 public class ClienteEntity {
-    private int id;
+    private int idCliente;
     private String nome;
     private Date dataNascimento;  
     private String email;   
@@ -19,11 +19,11 @@ public class ClienteEntity {
     private String telefone;
 
     public int getId() {
-        return id;
+        return idCliente;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int idCliente) {
+        this.idCliente = idCliente;
     }
 
     public String getNome() {

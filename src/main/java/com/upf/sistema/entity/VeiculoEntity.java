@@ -10,7 +10,7 @@ package com.upf.sistema.entity;
  */
 public class VeiculoEntity {
     
-    private int id;
+    private int idVeiculo;
     private String modelo;
     private String marca;
     private int ano;
@@ -18,11 +18,11 @@ public class VeiculoEntity {
     private double valorDiaria;
 
     public int getId() {
-        return id;
+        return idVeiculo;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int idVeiculo) {
+        this.idVeiculo = idVeiculo;
     }
 
     public String getModelo() {

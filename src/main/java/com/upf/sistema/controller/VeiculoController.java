@@ -6,9 +6,10 @@ package com.upf.sistema.controller;
 
 import com.upf.sistema.entity.VeiculoEntity;
 import jakarta.inject.Named;
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,19 +18,15 @@ import java.util.List;
  * @author Usuario
  */
 @Named(value = "veiculoController")
-@Dependent
-public class VeiculoController {
+@SessionScoped
+public class VeiculoController implements Serializable {
 
-    /**
-     * Creates a new instance of VeiculoController
-     */
-    public VeiculoController() {
-    }
-    
     private VeiculoEntity veiculo = new VeiculoEntity();
     private List<VeiculoEntity> veiculoList = new ArrayList<>();
     private VeiculoEntity selected;
+    private int nextId = 1;
 
+    // Getters and Setters
     public VeiculoEntity getVeiculo() {
         return veiculo;
     }
@@ -54,57 +51,74 @@ public class VeiculoController {
         this.selected = selected;
     }
     
+    public int getNextId() {
+        return nextId;
+    }
+
+    public void setNextId(int nextId) {
+        this.nextId = nextId;
+    }
+
+    // Métodos
+    private int gerarId() {
+        return nextId++;
+    }
+
     private void exibirMensagem(String summary, String detail) {
         FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);
         FacesContext.getCurrentInstance().addMessage(null, fm);
     }
 
-    private int gerarId() {
-        int id = 1;
-        if (!veiculoList.isEmpty()) {
-            id = veiculoList.size() + 1;
-        }
-        return id;
-    }
-    
     public void adicionarVeiculo() {
+        if (veiculo.getModelo() == null || veiculo.getModelo().isEmpty()) {
+            exibirMensagem("Erro", "Modelo do veículo é obrigatório.");
+            return;
+        }
         try {
             veiculo.setId(gerarId());
             veiculoList.add(veiculo);
-            exibirMensagem("Info", "Veiculo adicionado: " + veiculo.getModelo());
+            exibirMensagem("Info", "Veículo adicionado: " + veiculo.getModelo());
             veiculo = new VeiculoEntity(); // Resetar o objeto para um novo cadastro
         } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao adicionar Veiculo: " + e.getMessage());
+            exibirMensagem("Erro", "Falha ao adicionar veículo: " + e.getMessage());
         }
     }
 
     public void editarVeiculo() {
+        if (selected == null) {
+            exibirMensagem("Erro", "Nenhum veículo selecionado para edição.");
+            return;
+        }
         try {
             int index = veiculoList.indexOf(selected);
             if (index != -1) {
                 veiculoList.set(index, selected);
                 exibirMensagem("Sucesso", "Registro alterado com sucesso.");
             } else {
-                exibirMensagem("Erro", "Veiculo não encontrado para edição.");
+                exibirMensagem("Erro", "Veículo não encontrado para edição.");
             }
             selected = null;
         } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao editar usuário: " + e.getMessage());
+            exibirMensagem("Erro", "Falha ao editar veículo: " + e.getMessage());
         }
     }
 
     public void deletarVeiculo() {
+        if (selected == null) {
+            exibirMensagem("Erro", "Nenhum veículo selecionado para exclusão.");
+            return;
+        }
         try {
             int index = veiculoList.indexOf(selected);
             if (index != -1) {
                 veiculoList.remove(index);
                 exibirMensagem("Sucesso", "Registro excluído com sucesso.");
             } else {
-                exibirMensagem("Erro", "Veiculo não encontrado para exclusão.");
+                exibirMensagem("Erro", "Veículo não encontrado para exclusão.");
             }
             selected = null;
         } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao deletar usuário: " + e.getMessage());
+            exibirMensagem("Erro", "Falha ao deletar veículo: " + e.getMessage());
         }
     }
 }

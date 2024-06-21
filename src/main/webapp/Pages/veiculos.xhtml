@@ -1,0 +1,303 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title>Veiculos</title>
+        <style>
+            .espaco-abaixo {
+                margin-bottom: 20px;
+            }
+            .form-content {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+            }
+            .form-content > div {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                width: 100%;
+            }
+            .form-content label {
+                flex: 0 0 150px; /* Largura fixa para as labels */
+                margin-right: 10px; /* Espaçamento entre label e input */
+            }
+            .form-content input, .form-content select {
+                flex: 1; /* Os inputs ocupam o restante do espaço disponível */
+            }
+            .form-content button {
+                align-self: center;
+                width: auto;
+                margin-top: 20px; /* Espaçamento acima do botão */
+            }
+            .acoes-buttons {
+                display: flex;
+                justify-content: flex-start;
+                margin-bottom: 10px; /* Espaçamento abaixo do grupo de botões */
+            }
+            .acoes-buttons .p-button {
+                margin-right: 10px; /* Espaçamento entre os botões */
+            }
+            .form-container {
+                padding: 10px; /* Padding ao redor do formulário */
+                box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1); /* Sombra ao redor do formulário */
+                border-radius: 10px; /* Bordas arredondadas */
+                background-color: #fff; /* Fundo branco */
+            }
+        </style>
+ 
+    </h:head>
+    <h:body>
+        <h:form id="frmList">            
+            <h:panelGroup id="pngList"> 
+                <p:growl id="growl" showDetail="true" />
+                <p:fieldset toggleable="true" legend="Veículos">
+                    <p:dataTable id="datalist" value="#{veiculoController.veiculoList}" var="item"   
+                                 selectionMode="single" selection="#{veiculoController.selected}"
+                                 widgetVar="datalistVeiculoWidgetVar"
+                                 rowKey="#{item.id}"
+                                 rows="10"
+                                 rowsPerPageTemplate="5,10,50,100"
+                                 emptyMessage="Nenhum Veiculo cadastrado..."
+                                 >
+                        <!--Ação AJAX para atualizar somente os botões definidos em update -->
+                        <!--quando selecionado ou não -->
+                        <p:ajax event="rowSelect"   update="btnEdit btnDelete btnView"/>
+                        <p:ajax event="rowUnselect" update="btnEdit btnDelete btnView"/>
+
+                        <p:column width="4%" sortBy="#{item.id}" filterBy="#{item.id}">
+                            <f:facet name="header">
+                                <h:outputText value="ID"/>
+                            </f:facet>
+                            <h:outputText value="#{item.id}"/>
+                        </p:column>
+
+                        <p:column width="10%" sortBy="#{item.modelo}" filterBy="#{item.modelo}">
+                            <f:facet name="header">
+                                <h:outputText value="Modelo"/>
+                            </f:facet>
+                            <h:outputText value="#{item.modelo}"/>
+                        </p:column>
+
+                        <p:column width="10%" sortBy="#{item.marca}" filterBy="#{item.marca}">
+                            <f:facet name="header">
+                                <h:outputText value="Marca"/>
+                            </f:facet>
+                            <h:outputText value="#{item.marca}"/>
+                        </p:column>
+
+                        <p:column width="8%" sortBy="#{item.ano}" filterBy="#{item.ano}">
+                            <f:facet name="header">
+                                <h:outputText value="Ano"/>
+                            </f:facet>
+                            <h:outputText value="#{item.ano}"/>
+                        </p:column>
+
+                        <p:column width="5%" sortBy="#{item.placa}" filterBy="#{item.placa}">
+                            <f:facet name="header">
+                                <h:outputText value="Placa"/>
+                            </f:facet>
+                            <h:outputText value="#{item.placa}"/>
+                        </p:column>
+
+                        <p:column width="3%" sortBy="#{item.valorDiaria}" filterBy="#{item.valorDiaria}">
+                            <f:facet name="header">
+                                <h:outputText value="Valor Diaria"/>
+                            </f:facet>
+                            <h:outputText value="#{item.valorDiaria}"/>
+                        </p:column>
+
+                        <f:facet name="footer">
+                            <!--Botão utilizado para abrir a modal de criação -->
+                            <p:commandButton id="btnCreate" 
+                                             value="Cadastrar Veículo"  
+                                             icon="pi pi-car" 
+                                             onclick="PF('dlgCreate').show()"                                             
+                                             style="justify-content: center;
+                                                    margin: 0 15px;
+                                                    background-color: #006600;
+                                                    border: none"/>
+
+                            <!--Botão utilizado para abrir a modal de edição -->
+                            <p:commandButton id="btnEdit" 
+                                             icon="pi pi-car"  
+                                             value="Editar Veículo" 
+                                             update="formEdit" 
+                                             oncomplete="PF('dlgEdit').show()" 
+                                             disabled="#{empty veiculoController.selected}"
+                                             style="margin: 0 15px;
+                                                    background-color: #f9f800;
+                                                    border: none"/>
+
+                            <!--Botão utilizado para excluir o registro selecionado-->                            
+                            <p:commandButton id="btnDelete" icon="pi pi-trash"  value="Excluir Veículo" 
+                                             actionListener="#{veiculoController.deletarVeiculo()}" update="frmList" 
+                                             disabled="#{empty veiculoController.selected}"
+                                             style="margin: 0 15px;
+                                                    background-color: #d40002;
+                                                    border: none">
+                                <p:confirm header="Confirmar Exclusão" message="Você confirma exclusão do registro?" 
+                                           icon="ui-icon-alert"  />
+                            </p:commandButton>
+
+                            <!--Botão utilizado para abrir a modal de visualização -->
+                            <p:commandButton id="btnView" 
+                                             icon="pi pi-search"  
+                                             value="Detalhes do Veículo" 
+                                             update="formView" 
+                                             oncomplete="PF('dlgView').show()" 
+                                             disabled="#{empty veiculoController.selected}"/>
+
+                        </f:facet>
+                    </p:dataTable>
+                </p:fieldset>
+                <div class="espaco-abaixo"></div>
+                
+                <!--Diálogo para confirmação da exclusão -->
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Sim" 
+                                     type="button" 
+                                     styleClass="ui-confirmdialog-yes" 
+                                     icon="pi pi-check" />
+                    
+                    <p:commandButton value="Não" 
+                                     type="button" 
+                                     styleClass="ui-confirmdialog-no" 
+                                     icon="pi pi-times" />
+                </p:confirmDialog>
+
+            </h:panelGroup>
+        </h:form>
+
+        <p:dialog header="Cadastrar Veículo" widgetVar="dlgCreate" height="250" width="600" showEffect="fade" modal="true">
+            <h:form id="CreateForm">
+                <p:growl id="growl" showDetail="true" />
+                <h:panelGrid id="pngCadastro" columns="2">   
+                    <p:outputLabel id="oplModelo" value="Modelo:" for="iptModelo"/>
+                    <p:inputText id="iptModelo" size="40" label="Modelo" required="true" 
+                                 requiredMessage="O atributo Modelo é obrigatório"
+                                 value="#{veiculoController.veiculo.modelo}" maxlength="50" />
+
+                    <p:outputLabel id="oplMarca" value="Marca:" for="iptMarca"/>
+                    <p:inputText id="iptMarca" size="40" label="Marca" required="true" 
+                                 requiredMessage="O atributo Marca é obrigatório"
+                                 value="#{veiculoController.veiculo.marca}" maxlength="50" />
+
+                     <p:outputLabel id="oplAno" value="Ano: " for="iptAno"/>
+                     <p:inputText id="iptAno" size="4" label="Ano" required="true" 
+                                  requiredMessage="O atributo Ano é obrigatório" 
+                                  value="#{veiculoController.veiculo.ano}" maxlength="4" />
+
+                     <p:outputLabel id="opPlaca" value="Placa: " for="iptPlaca"/>
+                     <p:inputMask id="iptPlaca" size="7" label="Placa" required="true" 
+                                  requiredMessage="O atributo Placa é obrigatório"
+                                  value="#{veiculoController.veiculo.placa}" maxlength="7" />
+                     
+                     <p:outputLabel id="oplValorDiaria" value="Valor Diária: " for="iptValorDiaria"/>
+                    <p:inputText id="iptValorDiaria" size="10" label="Valor Diária" required="true" 
+                                 requiredMessage="O atributo Valor Diária é obrigatório" 
+                                 value="#{veiculoController.veiculo.valorDiaria}" maxlength="10">
+                        <f:convertNumber type="currency" currencySymbol="R$" />
+                    </p:inputText>
+                         
+                </h:panelGrid>   
+                
+                <div class="espaco-abaixo"></div>
+                                
+                <p:commandButton id="btnCadastrar" 
+                                 value="Cadastrar Veículo" 
+                                 update="@form, frmList" 
+                                 icon="pi pi-save"
+                                 action="#{veiculoController.adicionarVeiculo()}" 
+                                 onclick="dlgCreate.hide()"        
+                                 style="justify-content: center;
+                                                    margin: 0 15px;
+                                                    background-color: #006600;
+                                                    border: none"/>
+            </h:form>
+        </p:dialog>
+
+
+        <p:dialog header="Editar Veículo" widgetVar="dlgEdit" height="300" width="600" showEffect="fade" modal="true">
+            <h:form id="formEdit">
+                <p:growl id="growl" showDetail="true" />
+                <h:panelGrid id="pngEdicao" columns="2">   
+                    <p:outputLabel id="oplId" value="ID:" for="iptId"/>
+                    <p:inputText id="iptId" size="10" label="ID" disabled="true"
+                                 value="#{veiculoController.selected.id}"  />
+
+                    <p:outputLabel id="oplModelo" value="Modelo:" for="iptModelo"/>
+                    <p:inputText id="iptModelo" size="40" label="Modelo" required="true" 
+                                 requiredMessage="O atributo Modelo é obrigatório"
+                                 value="#{veiculoController.selected.modelo}" maxlength="50" />
+
+                    <p:outputLabel id="oplMarca" value="Marca:" for="iptMarca"/>
+                    <p:inputText id="iptMarca" size="40" label="Marca" required="true" 
+                                 requiredMessage="O atributo Marca é obrigatório"
+                                 value="#{veiculoController.selected.marca}" maxlength="50" />
+
+                    <p:outputLabel id="oplAno" value="Ano:" for="iptAno"/>
+                    <p:inputText id="iptAno" size="40" label="Ano" required="true" 
+                                 requiredMessage="O atributo Ano é obrigatório"
+                                 value="#{veiculoController.selected.ano}" maxlength="4" />
+
+                    <p:outputLabel id="oplPlaca" value="Placa:" for="iptPlaca"/>
+                    <p:inputText id="iptPlaca" size="40" label="Placa" required="true" 
+                                 requiredMessage="O atributo Placa é obrigatório"
+                                 value="#{veiculoController.selected.placa}" maxlength="7" />
+
+                    <p:outputLabel id="oplValorDiaria" value="Valor Diária:" for="iptValorDiaria"/>
+                    <p:inputText id="iptValorDiaria" size="40" label="Valor Diária" required="true" 
+                                 requiredMessage="O atributo Valor Diária é obrigatório"
+                                 value="#{veiculoController.selected.valorDiaria}" maxlength="10" />
+                </h:panelGrid>   
+                
+                <div class="espaco-abaixo"></div>             
+                
+                <p:commandButton id="btnSalvarEdicao" 
+                                 value="Editar Veículo" 
+                                 update="@form, frmList" 
+                                 onclick="dlgEdit.hide()" 
+                                 icon="pi pi-car"
+                                 action="#{veiculoController.editarVeiculo()}" 
+                                 style="margin: 0 15px;
+                                        background-color: #f9f800;
+                                        border: none"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Visualizar Detalhes do Veículo" widgetVar="dlgView" height="250" 
+                width="500" showEffect="fade" modal="true">
+          <h:form id="formView">
+              <h:panelGrid id="pngView" columns="2">   
+                    <p:outputLabel id="oplId" value="ID: " for="iptId"/>
+                    <p:inputText id="iptId" size="10" label="ID" disabled="true"
+                                 value="#{veiculoController.selected.id}"  />
+                    
+                    <p:outputLabel id="oplModelo" value="Modelo: " for="iptModelo"/>
+                    <p:inputText id="iptModelo" size="10" label="Modelo" disabled="true"
+                                 value="#{veiculoController.selected.modelo}"  />
+                    
+                    <p:outputLabel id="oplMarca" value="Marca: " for="iptMarca"/>
+                    <p:inputText id="iptMarca" size="10" label="Marca" disabled="true"
+                                 value="#{veiculoController.selected.marca}"  />
+
+                    <p:outputLabel id="oplAno" value="Ano: " for="iptAno"/>
+                    <p:inputText id="iptAno" size="10" label="Ano" disabled="true"
+                                 value="#{veiculoController.selected.ano}"  />                   
+                    
+                    <p:outputLabel id="oplPlaca" value="Placa: " for="iptPlaca"/>
+                    <p:inputText id="iptPlaca" size="10" label="Placa" disabled="true"
+                                 value="#{veiculoController.selected.placa}"  /> 
+ 
+                    <p:outputLabel id="oplValorDiaria" value="Valor Diaria: " for="iptValorDiaria"/>
+                    <p:inputText id="iptValorDiaria" size="10" label="ValorDiaria" disabled="true"
+                                 value="#{veiculoController.selected.valorDiaria}"  />                     
+              </h:panelGrid>   
+          </h:form>
+      </p:dialog>
+    </h:body>
+</html>
