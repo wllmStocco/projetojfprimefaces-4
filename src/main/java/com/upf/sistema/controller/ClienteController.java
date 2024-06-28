@@ -5,6 +5,8 @@
 package com.upf.sistema.controller;
 
 import com.upf.sistema.entity.ClienteEntity;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
@@ -21,6 +23,9 @@ import java.util.List;
 @SessionScoped
 public class ClienteController implements Serializable {
 
+    @EJB
+    private com.upf.sistema.facade.ClienteFacade ejbFacade;
+
     private ClienteEntity cliente = new ClienteEntity();
     private List<ClienteEntity> clienteList = new ArrayList<>();
     private ClienteEntity selected;
@@ -36,7 +41,7 @@ public class ClienteController implements Serializable {
     }
 
     public List<ClienteEntity> getClienteList() {
-        return clienteList;
+        return ejbFacade.buscarTodos();
     }
 
     public void setClienteList(List<ClienteEntity> clienteList) {
@@ -50,7 +55,7 @@ public class ClienteController implements Serializable {
     public void setSelected(ClienteEntity selected) {
         this.selected = selected;
     }
-    
+
     public int getNextId() {
         return nextId;
     }
@@ -59,66 +64,72 @@ public class ClienteController implements Serializable {
         this.nextId = nextId;
     }
 
-    // Methods
-    private int gerarId() {
-        return nextId++;
+    public ClienteEntity prepareAdicionar() {
+        cliente = new ClienteEntity();
+        return cliente;
     }
 
-    private void exibirMensagem(String summary, String detail) {
-        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);
+    private void addErrorMessage(String msg) {
+        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, msg);
         FacesContext.getCurrentInstance().addMessage(null, fm);
     }
 
-    public void adicionarCliente() {
-        if (cliente.getNome() == null || cliente.getNome().isEmpty()) {
-            exibirMensagem("Erro", "Nome do cliente é obrigatório.");
-            return;
-        }
+    private void addSuccessMessage(String msg) {
+        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, msg, msg);
+        FacesContext.getCurrentInstance().addMessage("sucessInfo", fm);
+    }
+
+    public static enum PersistAction {
+        CREATE,
+        DELETE,
+        UPDATE
+    }
+
+    private void persist(PersistAction persistAction, String successMessage) {
         try {
-            cliente.setId(gerarId());
-            clienteList.add(cliente);
-            exibirMensagem("Info", "Cliente adicionado: " + cliente.getNome());
-            cliente = new ClienteEntity(); // Resetar o objeto para um novo cadastro
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao adicionar cliente: " + e.getMessage());
+            if (null != persistAction) {
+                switch (persistAction) {
+                    case CREATE:
+                        ejbFacade.createReturn(cliente);
+                        break;
+                    case UPDATE:
+                        ejbFacade.edit(selected);
+                        selected = null;
+                        break;
+                    case DELETE:
+                        ejbFacade.remove(selected);
+                        selected = null;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            addSuccessMessage(successMessage);
+        } catch (EJBException ex) {
+            String msg = "";
+            Throwable cause = ex.getCause();
+            if (cause != null) {
+                msg = cause.getLocalizedMessage();
+            }
+            if (msg.length() > 0) {
+                addErrorMessage(msg);
+            } else {
+                addErrorMessage(ex.getLocalizedMessage());
+            }
+        } catch (Exception ex) {
+            addErrorMessage(ex.getLocalizedMessage());
         }
+    }
+
+    public void adicionarCliente() {
+        persist(ClienteController.PersistAction.CREATE, "Cliente criado com sucesso!");
     }
 
     public void editarCliente() {
-        if (selected == null) {
-            exibirMensagem("Erro", "Nenhum cliente selecionado para edição.");
-            return;
-        }
-        try {
-            int index = clienteList.indexOf(selected);
-            if (index != -1) {
-                clienteList.set(index, selected);
-                exibirMensagem("Sucesso", "Registro alterado com sucesso.");
-            } else {
-                exibirMensagem("Erro", "Cliente não encontrado para edição.");
-            }
-            selected = null;
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao editar cliente: " + e.getMessage());
-        }
+        persist(ClienteController.PersistAction.UPDATE, "Cliente atualizado com sucesso!");
     }
 
     public void deletarCliente() {
-        if (selected == null) {
-            exibirMensagem("Erro", "Nenhum cliente selecionado para exclusão.");
-            return;
-        }
-        try {
-            int index = clienteList.indexOf(selected);
-            if (index != -1) {
-                clienteList.remove(index);
-                exibirMensagem("Sucesso", "Registro excluído com sucesso.");
-            } else {
-                exibirMensagem("Erro", "Cliente não encontrado para exclusão.");
-            }
-            selected = null;
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao deletar cliente: " + e.getMessage());
-        }
+        persist(ClienteController.PersistAction.DELETE, "Cliente removido com sucesso!");
     }
 }

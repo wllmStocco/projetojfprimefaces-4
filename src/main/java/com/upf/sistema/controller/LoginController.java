@@ -6,6 +6,7 @@ package com.upf.sistema.controller;
 
 import com.upf.sistema.entity.UsuarioEntity;
 import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
@@ -19,6 +20,8 @@ import jakarta.faces.context.FacesContext;
 @RequestScoped
 public class LoginController {
 
+    @EJB com.upf.sistema.facade.UsuarioFacade ejbFacade;
+    
     private UsuarioEntity usuario;
 
     @PostConstruct
@@ -33,17 +36,21 @@ public class LoginController {
     public void setUsuario(UsuarioEntity usuario) {
         this.usuario = usuario;
     }
-
+    
     public String validarLogin() {
-        // Simulação de verificação de credenciais (substitua por lógica real de autenticação)
-        if ("teste@teste.com".equals(usuario.getEmail()) && "123".equals(usuario.getSenha())) {
+        UsuarioEntity usuarioDB = ejbFacade.buscarPorEmail(usuario.getEmail(), usuario.getSenha());
+        if ((usuarioDB != null && usuarioDB.getId() != 0)) {
+            // caso as credenciais forem válidas, então direciona para página index
             return "/index.xhtml?faces-redirect=true";
         } else {
-            FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha no Login!", "Email ou senha incorretos!");
+            // senão, exibe uma mensagem de falha...
+            FacesMessage fm = new FacesMessage(
+                FacesMessage.SEVERITY_ERROR,
+                "Falha no Login!",
+                "Email ou senha incorreto!");
             FacesContext.getCurrentInstance().addMessage(null, fm);
             return null;
         }
     }
-
 
 }

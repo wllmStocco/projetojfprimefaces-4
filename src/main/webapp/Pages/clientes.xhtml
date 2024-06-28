@@ -1,55 +1,18 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:f="jakarta.faces.core">
-    <h:head>
-        <title>Clientes</title>
-       <style>
-            .espaco-abaixo {
-                margin-bottom: 20px;
-            }
-            .form-content {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-            }
-            .form-content > div {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-                width: 100%;
-            }
-            .form-content label {
-                flex: 0 0 150px; /* Largura fixa para as labels */
-                margin-right: 10px; /* Espaçamento entre label e input */
-            }
-            .form-content input, .form-content select {
-                flex: 1; /* Os inputs ocupam o restante do espaço disponível */
-            }
-            .form-content button {
-                align-self: center;
-                width: auto;
-                margin-top: 20px; /* Espaçamento acima do botão */
-            }
-            .acoes-buttons {
-                display: flex;
-                justify-content: flex-start;
-                margin-bottom: 10px; /* Espaçamento abaixo do grupo de botões */
-            }
-            .acoes-buttons .p-button {
-                margin-right: 10px; /* Espaçamento entre os botões */
-            }
-            .form-container {
-                padding: 10px; /* Padding ao redor do formulário */
-                box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1); /* Sombra ao redor do formulário */
-                border-radius: 10px; /* Bordas arredondadas */
-                background-color: #fff; /* Fundo branco */
-            }
-        </style>        
-    </h:head>
-    <h:body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/template.xhtml"
+                xmlns:f="jakarta.faces.core">
+
+    <ui:define name="title">
+        <h:outputText value="Página Inicial"/>
+    </ui:define>
+    
+    <ui:define name="content">
         <h:form id="frmList">            
             <h:panelGroup id="pngList"> 
                 <p:growl id="growl" showDetail="true" />
@@ -136,7 +99,7 @@
 
 
                             <!--Botão utilizado para excluir o registro selecionado-->                            
-                            <p:commandButton id="btnDelete" icon="pi pi-trash"  value="Excluir Pessoa" 
+                            <p:commandButton id="btnDelete" icon="pi pi-trash"  value="Excluir Cliente" 
                                              actionListener="#{clienteController.deletarCliente()}" update="frmList" 
                                              disabled="#{empty clienteController.selected}"                                             style="margin: 0 15px;
                                                     background-color: #d40002;
@@ -146,7 +109,7 @@
                             </p:commandButton>
 
                             <!--Botão utilizado para abrir a modal de visualização -->
-                            <p:commandButton id="btnView" icon="pi pi-search"  value="Detalhes da Pessoa" 
+                            <p:commandButton id="btnView" icon="pi pi-search"  value="Detalhes da Cliente" 
                                              update="formView" oncomplete="PF('dlgView').show()" 
                                              disabled="#{empty clienteController.selected}"/>
 
@@ -217,7 +180,7 @@
             </h:form>
         </p:dialog>
 
-        <p:dialog header="Editar Pessoa" widgetVar="dlgEdit"  height="400" width="600" showEffect="fade" modal="true">
+        <p:dialog header="Editar Cliente" widgetVar="dlgEdit"  height="400" width="600" showEffect="fade" modal="true">
             <h:form id="formEdit">
                 <p:growl id="growl" showDetail="true" />
                 <h:panelGrid id="pngEdicao" columns="2">   
@@ -252,8 +215,11 @@
                     <p:inputText id="iptEndereco" required="true" requiredMessage="O atributo Enderço é obrigatório" value="#{clienteController.cliente.endereco}" maxlength="100"/>
 
                 </h:panelGrid>   
-                <p:commandButton id="btnSalvarEdicao" value="Editar Cliente" update="@form, frmList" 
-                                 onclick="dlgEdit.hide()" icon="pi pi-user-edit"
+                <p:commandButton id="btnSalvarEdicao" 
+                                 value="Editar Cliente" 
+                                 update="@form, frmList" 
+                                 onclick="dlgEdit.hide()" 
+                                 icon="pi pi-user-edit"
                                  action="#{clienteController.editarCliente()}"                                 
                                  style="justify-content: center;
                                         background-color: #f9f800;
@@ -261,7 +227,7 @@
             </h:form>
         </p:dialog>
 
-        <p:dialog header="Visualizar Detalhes da Pessoa" widgetVar="dlgView"  height="250" 
+        <p:dialog header="Visualizar Detalhes da Cliente" widgetVar="dlgView"  height="250" 
                   width="500" showEffect="fade" modal="true">
             <h:form id="formView">
                 <h:panelGrid id="pngView" columns="2">   
@@ -288,6 +254,5 @@
                 </h:panelGrid>   
             </h:form>
         </p:dialog>
-
-    </h:body>
-</html>
+    </ui:define>
+</ui:composition>

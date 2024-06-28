@@ -9,30 +9,24 @@
                 xmlns:f="jakarta.faces.core">
 
     <ui:define name="title">
-        <h:outputText value="Usuario">
-            
-        </h:outputText>
+        <h:outputText value="Página Inicial"/>
     </ui:define>
     
     <ui:define name="content">
         <h:form id="frmList">            
             <h:panelGroup id="pngList"> 
                 <p:growl id="growl" showDetail="true" />
-                <p:fieldset toggleable="true" legend="Usuários">
-                    <p:dataTable id="datalist" value="#{usuarioController.usuarioList}" var="item"   
-                                 selectionMode="single" 
-                                 selection="#{usuarioController.selected}"
-                                 widgetVar="datalistUsuarioWidgetVar"
+                <p:fieldset toggleable="true" legend="Locação">
+                    <p:dataTable id="datalist" value="#{locacaoController.locacaoList}" var="item"   
+                                 selectionMode="single" selection="#{locacaoController.selected}"
+                                 widgetVar="datalistLocacaoWidgetVar"
                                  rowKey="#{item.id}"
                                  rows="10"
                                  rowsPerPageTemplate="5,10,50,100"
-                                 emptyMessage="Nenhum Usuário cadastrado..."
-                                 paginator="3"
+                                 emptyMessage="Nenhuma Locação cadastrada..."
                                  >
-                        
                         <!--Ação AJAX para atualizar somente os botões definidos em update -->
                         <!--quando selecionado ou não -->
-                        
                         <p:ajax event="rowSelect"   update="btnEdit btnDelete btnView"/>
                         <p:ajax event="rowUnselect" update="btnEdit btnDelete btnView"/>
 
@@ -43,56 +37,68 @@
                             <h:outputText value="#{item.id}"/>
                         </p:column>
 
-                        <p:column width="10%" sortBy="#{item.nome}" filterBy="#{item.nome}">
+                        <p:column width="10%" sortBy="#{item.cliente.nome}" filterBy="#{item.cliente.nome}">
                             <f:facet name="header">
-                                <h:outputText value="Nome"/>
+                                <h:outputText value="Cliente"/>
                             </f:facet>
-                            <h:outputText value="#{item.nome}"/>
+                            <h:outputText value="#{item.cliente.nome}"/>
                         </p:column>
 
-
-                        <p:column width="8%" sortBy="#{item.email}" filterBy="#{item.email}">
+                        <p:column width="10%" sortBy="#{item.veiculo.modelo}" filterBy="#{item.veiculo.modelo}">
                             <f:facet name="header">
-                                <h:outputText value="Email"/>
+                                <h:outputText value="Veiculo"/>
                             </f:facet>
-                            <h:outputText value="#{item.email}"/>
+                            <h:outputText value="#{item.veiculo.modelo}"/>
                         </p:column>
-
-                        <p:column width="10%" sortBy="#{item.senha}" filterBy="#{item.senha}">
+                        
+                        <p:column width="10%" sortBy="#{item.dataInicio}" filterBy="#{item.dataInicio}">
                             <f:facet name="header">
-                                <h:outputText value="Senha"/>
+                                <h:outputText value="Data Inicio"/>
                             </f:facet>
-                            <h:outputText value="#{item.senha}"/>
-                        </p:column>
-
+                            <h:outputText value="#{item.dataInicio}">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                            </h:outputText>
+                        </p:column>   
+                        
+                        <p:column width="10%" sortBy="#{item.dataFim}" filterBy="#{item.dataFim}">
+                            <f:facet name="header">
+                                <h:outputText value="Data Fim"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dataFim}">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                            </h:outputText>
+                        </p:column>  
+                        
+                        <p:column width="10%" sortBy="#{item.valorTotal}" filterBy="#{item.valorTotal}">
+                            <f:facet name="header">
+                                <h:outputText value="Valor Total"/>
+                            </f:facet>
+                            <h:outputText value="#{item.valorTotal}">
+                                <f:convertNumber type="currency" currencySymbol="R$" />
+                            </h:outputText>
+                        </p:column>                                    
+                                               
                         <f:facet name="footer">
                             <!--Botão utilizado para abrir a modal de criação -->
-                            <p:commandButton id="btnCreate" 
-                                             value="Cadastrar Usuário"  
-                                             icon="pi pi-user-plus" 
-                                             onclick="PF('dlgCreate').show()"
+                            <p:commandButton id="btnCreate" value="Cadastrar Locação"  icon="pi pi-file" 
+                                             onclick="PF('dlgCreate').show()"                                             
                                              style="justify-content: center;
                                                     margin: 0 15px;
                                                     background-color: #006600;
                                                     border: none"/>
 
                             <!--Botão utilizado para abrir a modal de edição -->
-                            <p:commandButton id="btnEdit" 
-                                             icon="pi pi-user-edit"  
-                                             value="Editar Usuário" 
-                                             update="formEdit" 
-                                             oncomplete="PF('dlgEdit').show()" 
-                                             disabled="#{empty usuarioController.selected}"
+                            <p:commandButton id="btnEdit" icon="pi pi-user-edit"  value="Editar Locação" 
+                                             update="formEdit" oncomplete="PF('dlgEdit').show()" 
+                                             disabled="#{empty locacaoController.selected}"    
                                              style="margin: 0 15px;
                                                     background-color: #f9f800;
                                                     border: none"/>
 
                             <!--Botão utilizado para excluir o registro selecionado-->                            
-                            <p:commandButton id="btnDelete" icon="pi pi-trash"  
-                                             value="Excluir Usuário" 
-                                             actionListener="#{usuarioController.deletarUsuario()}" 
-                                             update="frmList" 
-                                             disabled="#{empty usuarioController.selected}"
+                            <p:commandButton id="btnDelete" icon="pi pi-trash"  value="Excluir Locação" 
+                                             actionListener="#{locacaoController.editarLocacao()}" update="frmList" 
+                                             disabled="#{empty locacaoController.selected}"   
                                              style="margin: 0 15px;
                                                     background-color: #d40002;
                                                     border: none">
@@ -103,9 +109,10 @@
                             <!--Botão utilizado para abrir a modal de visualização -->
                             <p:commandButton id="btnView" icon="pi pi-search"  value="Detalhes da Pessoa" 
                                              update="formView" oncomplete="PF('dlgView').show()" 
-                                             disabled="#{empty usuarioController.selected}"
+                                             disabled="#{empty locacaoController.selected}"    
                                              style="margin: 0 15px;
                                                     border: none"/>
+
 
                         </f:facet>
                     </p:dataTable>
@@ -128,119 +135,124 @@
 
             </h:panelGroup>
         </h:form>
-        <!-- Inicio Dialogos Usuarios -->
-        <!-- Visualizar Novo Usuário -->
-        <p:dialog header="Novo Usuário" 
-                  widgetVar="dlgCreate"  
-                  width="600" height="180" 
-                  showEffect="fade" 
-                  modal="true">
+
+        <p:dialog header="Nova Locação" widgetVar="dlgCreate" height="300" width="600" showEffect="fade" modal="true">
             <h:form id="CreateForm">
                 <p:growl id="growl" showDetail="true" />
                 <h:panelGrid id="pngCadastro" columns="2">   
-                    <p:outputLabel id="oplNome" value="Nome:" for="iptNome"/>
-                    <p:inputText id="iptNome" size="40" label="Nome" required="true" 
-                                 requiredMessage="O atributo Nome é obrigatório"
-                                 value="#{usuarioController.usuario.nome}" maxlength="50" />
+                    <p:selectOneMenu id="iptNome" value="#{locacaoController.locacao.cliente}" required="true"
+                                     requiredMessage="O atributo cliente é obrigatório">
+                        <f:selectItems value="#{clienteController.clienteList}" var="cliente" itemValue="#{cliente}" itemLabel="#{cliente.nome}"/>
+                    </p:selectOneMenu>
 
-                    <p:outputLabel id="oplEmail" value="Email:" for="iptEmail"/>
-                    <p:inputText id="iptEmail" size="40" label="Nome" required="true" 
-                                 requiredMessage="O atributo Email é obrigatório" validatorMessage="Campo email é inválido"
-                                 value="#{usuarioController.usuario.email}" maxlength="50" >
-                        <f:validateRegex pattern="[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})"  />
-                    </p:inputText>
-                    
-                    <p:outputLabel id="oplSenha" value="Senha:" for="iptSenha"/>
-                    <p:inputText id="iptSenha" size="40" label="Nome" required="true" 
-                                 requiredMessage="O atributo Senha é obrigatório"
-                                 value="#{usuarioController.usuario.senha}"/>
+                    <p:outputLabel id="oplVeiculo" value="Veículo: " for="iptVeiculo"/>
+                    <p:selectOneMenu id="iptVeiculo" value="#{locacaoController.locacao.veiculo}" required="true"
+                                     requiredMessage="O atributo veículo é obrigatório">
+                        <f:selectItems value="#{veiculoController.veiculoList}" var="veiculo" itemValue="#{veiculo}" itemLabel="#{veiculo.modelo}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel id="oplDataInicio" for="ipmDataInicio" value="Data Inicio"  />
+                    <p:inputMask id="ipmDataInicio" value="#{locacaoController.locacao.dataInicio}" 
+                                 mask="99/99/9999" required="true" requiredMessage="O atributo data de inicio é obrigatório">
+                        <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Sao_Paulo" />
+                    </p:inputMask>
+
+                    <p:outputLabel id="oplDataFim" for="ipmDataFim" value="Data Fim"  />
+                    <p:inputMask id="ipmDataFim" value="#{locacaoController.locacao.dataFim}" 
+                                 mask="99/99/9999" required="true" requiredMessage="O atributo data de fim é obrigatório">
+                        <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Sao_Paulo" />
+                    </p:inputMask>
+
+                <p:outputLabel id="oplValorTotal" value="Valor Total:" for="iptValorTotal"/>
+                <p:inputText id="iptValorTotal" size="40" label="Valor Total" required="true" 
+                             requiredMessage="O atributo Valor Total é obrigatório"
+                             value="#{locacaoController.locacao.valorTotal}">
+                    <f:convertNumber type="currency" currencySymbol="R$" />
+                </p:inputText>
 
                 </h:panelGrid>   
                 
                 <div class="espaco-abaixo"></div>
-
-                <p:commandButton id="btnCadastrar" 
-                                 value="Cadastrar Usuário" 
-                                 update="@form, frmList" 
-                                 icon="pi pi-user-plus"
-                                 action="#{usuarioController.adicionarUsuario()}" 
-                                 onclick="dlgCreate.hide()"
+     
+                <p:commandButton id="btnCadastrar" value="Cadastrar Locação" update="@form, frmList" icon="pi pi-save"
+                                 action="#{locacaoController.adicionarLocacao()}" onclick="dlgCreate.hide()"  
                                  style="justify-content: center;
                                         background-color: #006600;
                                         border: none"/>
             </h:form>
         </p:dialog>
-        
-        <!-- Visualizar Editar Usuário -->
-        <p:dialog header="Editar Usuário" 
-                  widgetVar="dlgEdit" 
-                  width="600" height="200" 
-                  showEffect="fade" 
-                  modal="true">
+
+        <p:dialog header="Editar Pessoa" widgetVar="dlgEdit"  height="400" width="600" showEffect="fade" modal="true">
             <h:form id="formEdit">
                 <p:growl id="growl" showDetail="true" />
                 <h:panelGrid id="pngEdicao" columns="2">   
                     <p:outputLabel id="oplId" value="ID:" for="iptId"/>
                     <p:inputText id="iptId" size="10" label="ID" disabled="true"
-                                 value="#{usuarioController.selected.id}"  />
+                                 value="#{locacaoController.selected.id}"  />
 
-                    <p:outputLabel id="oplNome" value="Nome:" for="iptNome"/>
-                    <p:inputText id="iptNome" size="40" label="Nome" required="true" 
-                                 requiredMessage="O atributo Nome é obrigatório"
-                                 value="#{usuarioController.selected.nome}" maxlength="50" />
+                    <p:outputLabel id="oplNome" value="Cliente:" for="iptNome"/>
+                    <p:selectOneMenu id="iptNome" value="#{locacaoController.selected.cliente}" required="true"
+                                     requiredMessage="O atributo cliente é obrigatório">
+                        <f:selectItems value="#{clienteController.clienteList}" var="cliente" itemValue="#{cliente}" itemLabel="#{cliente.nome}"/>
+                    </p:selectOneMenu>
 
-                   <p:outputLabel id="oplEmail" value="Email:" for="iptEmail"/>
-                    <p:inputText id="iptEmail" size="40" label="Nome" required="true" 
-                                 requiredMessage="O atributo Email é obrigatório" validatorMessage="Campo email é inválido"
-                                 value="#{usuarioController.selected.email}" maxlength="50" >
-                        <f:validateRegex pattern="[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})"  />
+                    <p:outputLabel id="oplVeiculo" value="Veículo: " for="iptVeiculo"/>
+                    <p:selectOneMenu id="iptVeiculo" value="#{locacaoController.selected.veiculo}" required="true"
+                                     requiredMessage="O atributo veículo é obrigatório">
+                        <f:selectItems value="#{veiculoController.veiculoList}" var="veiculo" itemValue="#{veiculo}" itemLabel="#{veiculo.modelo}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel id="oplDataInicio" for="ipmDataInicio" value="Data Início"  />
+                    <p:calendar id="ipmDataInicio" value="#{locacaoController.selected.dataInicio}" 
+                                pattern="dd/MM/yyyy" required="true" requiredMessage="O atributo data de início é obrigatório" />
+
+                    <p:outputLabel id="oplDataFim" for="ipmDataFim" value="Data Fim"  />
+                    <p:calendar id="ipmDataFim" value="#{locacaoController.selected.dataFim}" 
+                                pattern="dd/MM/yyyy" required="true" requiredMessage="O atributo data de fim é obrigatório" />
+
+                    <p:outputLabel id="oplValorTotal" value="Valor Total:" for="iptValorTotal"/>
+                    <p:inputText id="iptValorTotal" size="40" label="Valor Total" required="true" 
+                                 requiredMessage="O atributo valor total é obrigatório"
+                                 value="#{locacaoController.selected.valorTotal}">
+                        <f:convertNumber type="currency" currencySymbol="R$" />
                     </p:inputText>
-                    
-                    <p:outputLabel id="oplSenha" value="Senha:" for="iptSenha"/>
-                    <p:inputText id="iptSenha" size="40" label="Nome" required="true" 
-                                 requiredMessage="O atributo Senha é obrigatório"
-                                 value="#{usuarioController.selected.senha}"/>
 
-                </h:panelGrid> 
-                
-                <div class="espaco-abaixo"></div>
-
-                <p:commandButton id="btnSalvarEdicao" 
-                                 value="Salvar Usuário" 
-                                 update="@form, frmList" 
-                                 icon="pi pi-user-edit"
-                                 action="#{usuarioController.editarUsuario()}" 
-                                 onclick="dlgEdit.hide()"
-                                 style="justify-content: center;
-                                        background-color: #f9f800;
-                                        border: none"/>
+                </h:panelGrid>   
+                <p:commandButton id="btnSalvarEdicao" value="Salvar" update="@form, frmList" 
+                                 onclick="dlgEdit.hide()" icon="pi pi-save"
+                                 action="#{clienteController.editarCliente()}" />
             </h:form>
         </p:dialog>
-        
-        <!-- Visualizar Detalhes do Usuário -->
-        <p:dialog header="Visualizar Detalhes do Usuário" widgetVar="dlgView"  height="200" 
+
+        <p:dialog header="Visualizar Detalhes da Pessoa" widgetVar="dlgView"  height="250" 
                   width="500" showEffect="fade" modal="true">
             <h:form id="formView">
-                <h:panelGrid id="pngDetalhes" columns="2">   
-                    <p:outputLabel id="oplId" value="ID: " for="iptId"/>
-                    <p:inputText id="iptId" size="10" label="ID" disabled="true"
-                                 value="#{usuarioController.selected.id}"  />
+                <h:panelGrid id="pngView" columns="2">   
+                    <p:outputLabel value="ID:" />
+                    <p:outputLabel value="#{locacaoController.selected.id}"  />
 
-                    <p:outputLabel id="oplNome" value="Nome: " for="iptNome"/>
-                    <p:inputText id="iptNome" size="40" label="Nome" disabled="true"
-                                   value="#{usuarioController.selected.nome}" />
+                    <p:outputLabel value="Cliente: " />
+                    <p:outputLabel value="#{locacaoController.selected.cliente.nome}" />
 
-                    <p:outputLabel id="oplEmail" value="Email: " for="iptEmail"/>
-                    <p:inputText id="iptEmail" size="40" label="Email" disabled="true"
-                                 value="#{usuarioController.selected.email}"  />
+                    <p:outputLabel value="Veículo: " />
+                    <p:outputLabel value="#{locacaoController.selected.veiculo.modelo}" />
 
-                    <p:outputLabel id="oplSenha" value="Senha: " for="iptSenha"/>
-                    <p:inputText   id="iptSenha" size="40" label="Senha" disabled="true"
-                                   value="#{usuarioController.selected.senha}" />
-                    
-                </h:panelGrid>   
+                    <p:outputLabel value="Data de Início: "  />
+                    <p:outputLabel value="#{locacaoController.selected.dataInicio}">
+                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                    </p:outputLabel>
+
+                    <p:outputLabel value="Data de Fim: "  />
+                    <p:outputLabel value="#{locacaoController.selected.dataFim}">
+                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                    </p:outputLabel>
+
+                    <p:outputLabel value="Valor Total: "/>
+                    <p:outputLabel value="#{locacaoController.selected.valorTotal}">
+                        <f:convertNumber type="currency" currencySymbol="R$" />
+                    </p:outputLabel>
+                </h:panelGrid> 
             </h:form>
         </p:dialog>
     </ui:define>
-    
 </ui:composition>

@@ -6,6 +6,8 @@ package com.upf.sistema.controller;
  */
 
 import com.upf.sistema.entity.LocacaoEntity;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
@@ -22,6 +24,9 @@ import java.util.List;
 @SessionScoped
 public class LocacaoController implements Serializable {
 
+    @EJB
+    private com.upf.sistema.facade.LocacaoFacade ejbFacade;
+
     private LocacaoEntity locacao = new LocacaoEntity();
     private List<LocacaoEntity> locacaoList = new ArrayList<>();
     private LocacaoEntity selected;
@@ -37,7 +42,7 @@ public class LocacaoController implements Serializable {
     }
 
     public List<LocacaoEntity> getLocacaoList() {
-        return locacaoList;
+        return ejbFacade.buscarTodos();
     }
 
     public void setLocacaoList(List<LocacaoEntity> locacaoList) {
@@ -51,7 +56,7 @@ public class LocacaoController implements Serializable {
     public void setSelected(LocacaoEntity selected) {
         this.selected = selected;
     }
-    
+
     public int getNextId() {
         return nextId;
     }
@@ -60,67 +65,72 @@ public class LocacaoController implements Serializable {
         this.nextId = nextId;
     }
 
-    // Métodos Auxiliares
-    private int gerarId() {
-        return nextId++;
+    public LocacaoEntity prepareAdicionar() {
+        locacao = new LocacaoEntity();
+        return locacao;
     }
 
-    private void exibirMensagem(String summary, String detail) {
-        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);
+    private void addErrorMessage(String msg) {
+        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, msg);
         FacesContext.getCurrentInstance().addMessage(null, fm);
     }
 
-    // Métodos de Ação
-    public void adicionarLocacao() {
-        if (locacao.getCliente() == null || locacao.getVeiculo() == null || locacao.getDataInicio() == null || locacao.getDataFim() == null) {
-            exibirMensagem("Erro", "Todos os campos são obrigatórios.");
-            return;
-        }
+    private void addSuccessMessage(String msg) {
+        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, msg, msg);
+        FacesContext.getCurrentInstance().addMessage("sucessInfo", fm);
+    }
+
+    public static enum PersistAction {
+        CREATE,
+        DELETE,
+        UPDATE
+    }
+
+    private void persist(PersistAction persistAction, String successMessage) {
         try {
-            locacao.setId(gerarId());
-            locacaoList.add(locacao);
-            exibirMensagem("Info", "Locação adicionada: ID " + locacao.getId());
-            locacao = new LocacaoEntity(); // Resetar o objeto para um novo cadastro
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao adicionar locação: " + e.getMessage());
+            if (null != persistAction) {
+                switch (persistAction) {
+                    case CREATE:
+                        ejbFacade.createReturn(locacao);
+                        break;
+                    case UPDATE:
+                        ejbFacade.edit(selected);
+                        selected = null;
+                        break;
+                    case DELETE:
+                        ejbFacade.remove(selected);
+                        selected = null;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            addSuccessMessage(successMessage);
+        } catch (EJBException ex) {
+            String msg = "";
+            Throwable cause = ex.getCause();
+            if (cause != null) {
+                msg = cause.getLocalizedMessage();
+            }
+            if (msg.length() > 0) {
+                addErrorMessage(msg);
+            } else {
+                addErrorMessage(ex.getLocalizedMessage());
+            }
+        } catch (Exception ex) {
+            addErrorMessage(ex.getLocalizedMessage());
         }
+    }
+
+    public void adicionarLocacao() {
+        persist(LocacaoController.PersistAction.CREATE, "Locação criada com sucesso!");
     }
 
     public void editarLocacao() {
-        if (selected == null) {
-            exibirMensagem("Erro", "Nenhuma locação selecionada para edição.");
-            return;
-        }
-        try {
-            int index = locacaoList.indexOf(selected);
-            if (index != -1) {
-                locacaoList.set(index, selected);
-                exibirMensagem("Sucesso", "Locação alterada com sucesso.");
-            } else {
-                exibirMensagem("Erro", "Locação não encontrada para edição.");
-            }
-            selected = null;
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao editar locação: " + e.getMessage());
-        }
+        persist(LocacaoController.PersistAction.UPDATE, "Locação atualizada com sucesso!");
     }
 
     public void deletarLocacao() {
-        if (selected == null) {
-            exibirMensagem("Erro", "Nenhuma locação selecionada para exclusão.");
-            return;
-        }
-        try {
-            int index = locacaoList.indexOf(selected);
-            if (index != -1) {
-                locacaoList.remove(index);
-                exibirMensagem("Sucesso", "Locação excluída com sucesso.");
-            } else {
-                exibirMensagem("Erro", "Locação não encontrada para exclusão.");
-            }
-            selected = null;
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao deletar locação: " + e.getMessage());
-        }
+        persist(LocacaoController.PersistAction.DELETE, "Locação removida com sucesso!");
     }
 }

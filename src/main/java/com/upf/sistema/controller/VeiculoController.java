@@ -5,6 +5,8 @@
 package com.upf.sistema.controller;
 
 import com.upf.sistema.entity.VeiculoEntity;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
@@ -21,6 +23,9 @@ import java.util.List;
 @SessionScoped
 public class VeiculoController implements Serializable {
 
+    @EJB
+    private com.upf.sistema.facade.VeiculoFacade ejbFacade;
+
     private VeiculoEntity veiculo = new VeiculoEntity();
     private List<VeiculoEntity> veiculoList = new ArrayList<>();
     private VeiculoEntity selected;
@@ -36,7 +41,7 @@ public class VeiculoController implements Serializable {
     }
 
     public List<VeiculoEntity> getVeiculoList() {
-        return veiculoList;
+        return ejbFacade.buscarTodos();
     }
 
     public void setVeiculoList(List<VeiculoEntity> veiculoList) {
@@ -50,7 +55,7 @@ public class VeiculoController implements Serializable {
     public void setSelected(VeiculoEntity selected) {
         this.selected = selected;
     }
-    
+
     public int getNextId() {
         return nextId;
     }
@@ -59,66 +64,72 @@ public class VeiculoController implements Serializable {
         this.nextId = nextId;
     }
 
-    // Métodos
-    private int gerarId() {
-        return nextId++;
+    public VeiculoEntity prepareAdicionar() {
+        veiculo = new VeiculoEntity();
+        return veiculo;
     }
 
-    private void exibirMensagem(String summary, String detail) {
-        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);
+    private void addErrorMessage(String msg) {
+        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, msg);
         FacesContext.getCurrentInstance().addMessage(null, fm);
     }
 
-    public void adicionarVeiculo() {
-        if (veiculo.getModelo() == null || veiculo.getModelo().isEmpty()) {
-            exibirMensagem("Erro", "Modelo do veículo é obrigatório.");
-            return;
-        }
+    private void addSuccessMessage(String msg) {
+        FacesMessage fm = new FacesMessage(FacesMessage.SEVERITY_INFO, msg, msg);
+        FacesContext.getCurrentInstance().addMessage("sucessInfo", fm);
+    }
+
+    public static enum PersistAction {
+        CREATE,
+        DELETE,
+        UPDATE
+    }
+
+    private void persist(PersistAction persistAction, String successMessage) {
         try {
-            veiculo.setId(gerarId());
-            veiculoList.add(veiculo);
-            exibirMensagem("Info", "Veículo adicionado: " + veiculo.getModelo());
-            veiculo = new VeiculoEntity(); // Resetar o objeto para um novo cadastro
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao adicionar veículo: " + e.getMessage());
+            if (null != persistAction) {
+                switch (persistAction) {
+                    case CREATE:
+                        ejbFacade.createReturn(veiculo);
+                        break;
+                    case UPDATE:
+                        ejbFacade.edit(selected);
+                        selected = null;
+                        break;
+                    case DELETE:
+                        ejbFacade.remove(selected);
+                        selected = null;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            addSuccessMessage(successMessage);
+        } catch (EJBException ex) {
+            String msg = "";
+            Throwable cause = ex.getCause();
+            if (cause != null) {
+                msg = cause.getLocalizedMessage();
+            }
+            if (msg.length() > 0) {
+                addErrorMessage(msg);
+            } else {
+                addErrorMessage(ex.getLocalizedMessage());
+            }
+        } catch (Exception ex) {
+            addErrorMessage(ex.getLocalizedMessage());
         }
+    }
+
+    public void adicionarVeiculo() {
+        persist(VeiculoController.PersistAction.CREATE, "Veículo criado com sucesso!");
     }
 
     public void editarVeiculo() {
-        if (selected == null) {
-            exibirMensagem("Erro", "Nenhum veículo selecionado para edição.");
-            return;
-        }
-        try {
-            int index = veiculoList.indexOf(selected);
-            if (index != -1) {
-                veiculoList.set(index, selected);
-                exibirMensagem("Sucesso", "Registro alterado com sucesso.");
-            } else {
-                exibirMensagem("Erro", "Veículo não encontrado para edição.");
-            }
-            selected = null;
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao editar veículo: " + e.getMessage());
-        }
+        persist(VeiculoController.PersistAction.UPDATE, "Veículo atualizado com sucesso!");
     }
 
     public void deletarVeiculo() {
-        if (selected == null) {
-            exibirMensagem("Erro", "Nenhum veículo selecionado para exclusão.");
-            return;
-        }
-        try {
-            int index = veiculoList.indexOf(selected);
-            if (index != -1) {
-                veiculoList.remove(index);
-                exibirMensagem("Sucesso", "Registro excluído com sucesso.");
-            } else {
-                exibirMensagem("Erro", "Veículo não encontrado para exclusão.");
-            }
-            selected = null;
-        } catch (Exception e) {
-            exibirMensagem("Erro", "Falha ao deletar veículo: " + e.getMessage());
-        }
+        persist(VeiculoController.PersistAction.DELETE, "Veículo removido com sucesso!");
     }
 }

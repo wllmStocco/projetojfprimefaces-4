@@ -1,55 +1,20 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:f="jakarta.faces.core">
-    <h:head>
-        <title>Usuários</title>
-        <style>
-            .espaco-abaixo {
-                margin-bottom: 20px;
-            }
-            .form-content {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-            }
-            .form-content > div {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-                width: 100%;
-            }
-            .form-content label {
-                flex: 0 0 150px; /* Largura fixa para as labels */
-                margin-right: 10px; /* Espaçamento entre label e input */
-            }
-            .form-content input, .form-content select {
-                flex: 1; /* Os inputs ocupam o restante do espaço disponível */
-            }
-            .form-content button {
-                align-self: center;
-                width: auto;
-                margin-top: 20px; /* Espaçamento acima do botão */
-            }
-            .acoes-buttons {
-                display: flex;
-                justify-content: flex-start;
-                margin-bottom: 10px; /* Espaçamento abaixo do grupo de botões */
-            }
-            .acoes-buttons .p-button {
-                margin-right: 10px; /* Espaçamento entre os botões */
-            }
-            .form-container {
-                padding: 10px; /* Padding ao redor do formulário */
-                box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1); /* Sombra ao redor do formulário */
-                border-radius: 10px; /* Bordas arredondadas */
-                background-color: #fff; /* Fundo branco */
-            }
-        </style>
-    </h:head>
-    <h:body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/template.xhtml"
+                xmlns:f="jakarta.faces.core">
+
+    <ui:define name="title">
+        <h:outputText value="Usuario">
+            
+        </h:outputText>
+    </ui:define>
+    
+    <ui:define name="content">
         <h:form id="frmList">            
             <h:panelGroup id="pngList"> 
                 <p:growl id="growl" showDetail="true" />
@@ -77,7 +42,16 @@
                             </f:facet>
                             <h:outputText value="#{item.id}"/>
                         </p:column>
-
+                        
+                        <p:column width="6%" sortBy="#{item.datahorareg}" filterBy="#{item.datahorareg}">
+                            <f:facet name="header">
+                                <h:outputText value="Registro"/>
+                            </f:facet>
+                            <h:outputText value="#{item.datahorareg}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+                            </h:outputText>
+                        </p:column>
+                        
                         <p:column width="10%" sortBy="#{item.nome}" filterBy="#{item.nome}">
                             <f:facet name="header">
                                 <h:outputText value="Nome"/>
@@ -136,7 +110,7 @@
                             </p:commandButton>
 
                             <!--Botão utilizado para abrir a modal de visualização -->
-                            <p:commandButton id="btnView" icon="pi pi-search"  value="Detalhes da Pessoa" 
+                            <p:commandButton id="btnView" icon="pi pi-search"  value="Detalhes do usuario" 
                                              update="formView" oncomplete="PF('dlgView').show()" 
                                              disabled="#{empty usuarioController.selected}"
                                              style="margin: 0 15px;
@@ -218,7 +192,12 @@
                     <p:outputLabel id="oplId" value="ID:" for="iptId"/>
                     <p:inputText id="iptId" size="10" label="ID" disabled="true"
                                  value="#{usuarioController.selected.id}"  />
-
+                    
+                    <p:outputLabel id="oplDatahorareg" for="ipmDatahorareg" value="Registro" />
+                    <p:inputText id="ipmDatahorareg" value="#{usuarioController.selected.datahorareg}" disabled="true">
+                        <f:convertDateTime pattern="dd/MM/yy HH:mm" timeZone="America/Sao_Paulo" />
+                    </p:inputText>
+                    
                     <p:outputLabel id="oplNome" value="Nome:" for="iptNome"/>
                     <p:inputText id="iptNome" size="40" label="Nome" required="true" 
                                  requiredMessage="O atributo Nome é obrigatório"
@@ -275,6 +254,6 @@
                     
                 </h:panelGrid>   
             </h:form>
-        </p:dialog>  
-    </h:body>
-</html>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

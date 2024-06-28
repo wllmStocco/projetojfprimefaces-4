@@ -4,19 +4,52 @@
  */
 package com.upf.sistema.entity;
 
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.io.Serializable;
+
 /**
  *
  * @author Usuario
  */
-public class VeiculoEntity {
-    
+@Entity
+@Table(name = "Veiculo")
+public class VeiculoEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "idVeiculo")
     private int idVeiculo;
+
+    @Basic(optional = false)
+    @Column(name = "modelo", length = 100)
     private String modelo;
+
+    @Basic(optional = false)
+    @Column(name = "marca", length = 100)
     private String marca;
+
+    @Basic(optional = false)
+    @Column(name = "ano")
     private int ano;
+
+    @Basic(optional = false)
+    @Column(name = "placa", length = 10)
     private String placa;
+
+    @Basic(optional = false)
+    @Column(name = "valorDiaria")
     private double valorDiaria;
 
+    // Getters and Setters
     public int getId() {
         return idVeiculo;
     }
@@ -64,5 +97,4 @@ public class VeiculoEntity {
     public void setValorDiaria(double valorDiaria) {
         this.valorDiaria = valorDiaria;
     }
-    
 }
